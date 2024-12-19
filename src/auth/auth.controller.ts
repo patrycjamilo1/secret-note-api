@@ -22,6 +22,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -48,6 +49,7 @@ export class AuthController {
   @ApiUnauthorizedResponse()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
   logout(@GetCurrentUserId() userId: number) {
     return this.authService.logout(userId);
   }

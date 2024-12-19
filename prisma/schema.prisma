@@ -18,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  login    String
   email    String  @unique
   hash     String
   hashedRt String?

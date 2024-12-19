@@ -4,10 +4,18 @@ import {
   IsEmail,
   IsStrongPassword,
   Validate,
+  IsString,
+  MinLength,
 } from 'class-validator';
 import { CustomMatchPasswords } from 'src/common/constraints/match_password.constraint';
 
 export class AuthSignupDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(4)
+  login: string;
+
   @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
