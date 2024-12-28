@@ -24,5 +24,21 @@ model User {
   hashedRt String?
   image    String?
 
+  messages Message[]
+
   @@map("users")
+}
+
+model Message {
+  id               Int      @id @default(autoincrement())
+  uuid             String   @unique @default(uuid())
+  encryptedMessage String
+  password         String?
+  validUntil       DateTime?
+  userId           Int?
+  user             User?    @relation(fields: [userId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("messages")
 }
