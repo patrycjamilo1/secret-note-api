@@ -1,11 +1,25 @@
-import { randomBytes, createCipheriv, scryptSync } from 'crypto';
+import {
+  randomBytes,
+  createCipheriv,
+  scryptSync,
+  createDecipheriv,
+} from 'crypto';
 import { v4 as uuid } from 'uuid';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { ConfigService } from '@nestjs/config';
 import { MessageResponseDto } from './dto/message-response.dto';
+import { ReadMessageDto } from './dto/read-message.dto';
+import { ReadMessageResponseDto } from './dto/read-message-response.dto';
+import { MessageMetadataDto } from './dto/message-metadata.dto';
 
 @Injectable()
 export class MessagesService {
@@ -76,5 +90,99 @@ export class MessagesService {
     };
 
     return JSON.stringify(payload);
+  }
+
+  private decryptWithAES(encryptedData: string, password?: string): string {
+    try {
+      const parsedData = JSON.parse(encryptedData);
+      const iv = Buffer.from(parsedData.iv, 'base64');
+      const encryptedContent = parsedData.content;
+
+      const key = this.deriveAESKey(password);
+
+      const decipher = createDecipheriv(this.ENCRYPTION_ALGO, key, iv);
+
+      let decrypted = decipher.update(encryptedContent, 'base64', 'utf8');
+      decrypted += decipher.final('utf8');
+
+      return decrypted;
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to decrypt the message. It may be corrupted or the password is incorrect.',
+      );
+    }
+  }
+
+  public async readMessage(
+    uuid: string,
+    dto: ReadMessageDto,
+  ): Promise<ReadMessageResponseDto> {
+    const message = await this.prisma.message.findUnique({
+      where: { uuid },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found.');
+    }
+
+    if (message.validUntil && new Date() > message.validUntil) {
+      await this.prisma.message.delete({ where: { uuid } });
+      throw new BadRequestException('Message has expired.');
+    }
+
+    if (message.password) {
+      if (!dto.password) {
+        throw new ForbiddenException(
+          'Password is required to read this message.',
+        );
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        dto.password,
+        message.password,
+      );
+      if (!isPasswordValid) {
+        throw new ForbiddenException('Incorrect password.');
+      }
+    }
+
+    const decryptedMessage = this.decryptWithAES(
+      message.encryptedMessage,
+      dto.password,
+    );
+    await this.prisma.message.delete({ where: { uuid } });
+    const responseDto = new ReadMessageResponseDto({
+      secretMessage: decryptedMessage,
+      ...message,
+    });
+    return responseDto;
+  }
+
+  public async getMessageMetadata(uuid: string): Promise<MessageMetadataDto> {
+    const message = await this.prisma.message.findUnique({
+      where: { uuid },
+      select: {
+        uuid: true,
+        password: true,
+        validUntil: true,
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found.');
+    }
+
+    if (message.validUntil && new Date() > message.validUntil) {
+      await this.prisma.message.delete({ where: { uuid } });
+      throw new BadRequestException('Message has expired.');
+    }
+
+    const metadataDto = new MessageMetadataDto({
+      uuid: message.uuid,
+      validUntil: message.validUntil,
+      isPasswordProtected: !!message.password,
+    });
+
+    return metadataDto;
   }
 }
