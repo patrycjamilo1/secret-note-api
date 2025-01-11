@@ -20,6 +20,8 @@ import { MessageResponseDto } from './dto/message-response.dto';
 import { ReadMessageDto } from './dto/read-message.dto';
 import { ReadMessageResponseDto } from './dto/read-message-response.dto';
 import { MessageMetadataDto } from './dto/message-metadata.dto';
+import { GetUserMessagesDto } from './dto/get-user-messages.dto';
+import { UserMessageResponseDto } from './dto/user-message-response.dto';
 
 @Injectable()
 export class MessagesService {
@@ -184,5 +186,50 @@ export class MessagesService {
     });
 
     return metadataDto;
+  }
+
+  async getUserMessages(
+    userId: number,
+    query: GetUserMessagesDto,
+  ): Promise<{
+    items: UserMessageResponseDto[];
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const {
+      page = 1,
+      pageSize = 10,
+      sortBy = 'createdAt',
+      sortDirection = 'desc',
+      validUntilBefore,
+      validUntilAfter,
+    } = query;
+
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const where: any = { userId };
+    if (validUntilBefore || validUntilAfter) {
+      where.validUntil = {};
+      if (validUntilBefore) {
+        where.validUntil.lt = new Date(validUntilBefore);
+      }
+      if (validUntilAfter) {
+        where.validUntil.gt = new Date(validUntilAfter);
+      }
+    }
+
+    const orderBy = { [sortBy]: sortDirection };
+
+    const [messages, totalCount] = await Promise.all([
+      this.prisma.message.findMany({ where, orderBy, skip, take }),
+      this.prisma.message.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const mappedMesages = messages.map(
+      (message) => new UserMessageResponseDto(message),
+    );
+    return { items: mappedMesages, totalCount, totalPages };
   }
 }
