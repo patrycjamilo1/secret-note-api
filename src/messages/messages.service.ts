@@ -232,4 +232,12 @@ export class MessagesService {
     );
     return { items: mappedMesages, totalCount, totalPages };
   }
+
+  async deleteMessage(uuid: string): Promise<void> {
+    const message = await this.prisma.message.findUnique({ where: { uuid } });
+    if (!message) {
+      throw new NotFoundException('Message not found.');
+    }
+    await this.prisma.message.delete({ where: { uuid } });
+  }
 }

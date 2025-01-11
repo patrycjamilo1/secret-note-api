@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -145,5 +148,17 @@ export class MessagesController {
     @Body() dto: ReadMessageDto,
   ): Promise<ReadMessageResponseDto> {
     return await this.messagesService.readMessage(uuid, dto);
+  }
+
+  @Delete(':uuid')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.NO_CONTENT) // Return 204 No Content on success
+  @ApiOperation({ summary: 'Delete a message by UUID' })
+  @ApiResponse({ status: 204, description: 'Message deleted successfully.' })
+  @ApiResponse({ status: 404, description: 'Message not found.' })
+  async deleteMessage(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+  ): Promise<void> {
+    await this.messagesService.deleteMessage(uuid);
   }
 }
