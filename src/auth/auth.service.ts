@@ -32,7 +32,6 @@ export class AuthService {
       await this.updateRtHash(newUser.id, tokens.refresh_token);
       return tokens;
     } catch (ex) {
-      console.error(ex);
       throw new ConflictException(ExceptionMessages.EmailExists);
     }
   }
