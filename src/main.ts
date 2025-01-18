@@ -25,9 +25,9 @@ async function bootstrap() {
     credentials: true,
   });
   const config = new DocumentBuilder()
-    .setTitle('meetjoyer-api')
+    .setTitle('secret-note-api')
     .setDescription(
-      "API that provides data for events/meetings and let's you chat with each other",
+      'API that provides data for storing, and encrypting messages',
     )
     .setVersion('1.0')
     .addBearerAuth()
