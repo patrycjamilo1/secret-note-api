@@ -16,7 +16,6 @@ export class RecaptchaService {
     const url = `https://www.google.com/recaptcha/api/siteverify`;
 
     try {
-      console.log(secretKey, token);
       const response = await firstValueFrom(
         this.httpService
           .post(
@@ -32,8 +31,7 @@ export class RecaptchaService {
           ),
       );
 
-      const { success, score, action, hostname } = response.data;
-      console.log('SUCCESS: ', success, score, action, hostname);
+      const { success, score } = response.data;
       if (!success || score < 0.5) {
         throw new BadRequestException('Invalid reCAPTCHA token or low score');
       }
