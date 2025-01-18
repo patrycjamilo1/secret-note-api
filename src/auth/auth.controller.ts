@@ -9,7 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthSignInDto, AuthSignupDto } from './dto';
 import { Tokens } from './types';
-import { RtGuard } from 'src/common/guards';
+import { RecaptchaGuard, RtGuard } from 'src/common/guards';
 import {
   GetCurrentUser,
   GetCurrentUserId,
@@ -42,6 +42,7 @@ export class AuthController {
   @PublicRoute()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RecaptchaGuard)
   signinLocal(@Body() dto: AuthSignInDto): Promise<Tokens> {
     return this.authService.signinLocal(dto);
   }

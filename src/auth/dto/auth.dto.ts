@@ -51,4 +51,9 @@ export class AuthSignInDto {
   @ApiProperty()
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  gRecaptchaResponse: string;
 }
