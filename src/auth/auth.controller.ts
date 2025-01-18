@@ -33,6 +33,7 @@ export class AuthController {
   @ApiConflictResponse()
   @PublicRoute()
   @Post('local/signup')
+  @UseGuards(RecaptchaGuard)
   @HttpCode(HttpStatus.CREATED)
   signupLocal(@Body() dto: AuthSignupDto): Promise<Tokens> {
     return this.authService.signupLocal(dto);

@@ -14,7 +14,7 @@ import {
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { GetCurrentUserId } from 'src/common/decorators';
-import { OptionalAuthGuard } from 'src/common/guards';
+import { OptionalAuthGuard, RecaptchaGuard } from 'src/common/guards';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -107,6 +107,7 @@ export class MessagesController {
 
   @Post()
   @ApiOkResponse({ description: 'Created message', type: MessageResponseDto })
+  @UseGuards(RecaptchaGuard)
   async createMessage(
     @Body() dto: CreateMessageDto,
     @GetCurrentUserId() userId: number | null,
