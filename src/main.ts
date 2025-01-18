@@ -20,7 +20,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: 'https://secret-note.vercel.app',
+    origin: 'https://secret-note-app.netlify.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
