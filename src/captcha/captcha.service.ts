@@ -32,6 +32,7 @@ export class RecaptchaService {
       );
 
       const { success, score } = response.data;
+      console.log('SUCCESS: ', success, score);
       if (!success || score < 0.5) {
         throw new BadRequestException('Invalid reCAPTCHA token or low score');
       }
