@@ -1,3 +1,5 @@
+# Wskazuje z jakiej bazy korzystamy, mówi o użytkowniku i nazwie bazy danych
+
 services:
   db:
     image: postgres:16

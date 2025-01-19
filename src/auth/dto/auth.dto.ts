@@ -10,6 +10,7 @@ import {
 import { CustomMatchPasswords } from 'src/common/constraints/match_password.constraint';
 
 export class AuthSignupDto {
+  // Walidacja loginu
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
@@ -22,6 +23,7 @@ export class AuthSignupDto {
   email: string;
 
   @ApiProperty()
+  // Walidacja hasła
   @IsStrongPassword(
     {
       minLength: 8,

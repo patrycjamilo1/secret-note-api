@@ -78,6 +78,7 @@ export class MessagesService {
     }
   }
 
+  // Tworzymy klucz albo z hasłem defaultowym albo nasze, tworzyny iv, tworzymy zaszyfrowaną wiadomość
   private encryptWithAES(plainText: string, password?: string): string {
     const key = this.deriveAESKey(password);
     const iv = randomBytes(this.IV_LENGTH);

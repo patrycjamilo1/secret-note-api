@@ -6,6 +6,7 @@ import { UserModule } from './users/user.module';
 import { UploadModule } from './upload/upload.module';
 import { MessagesModule } from './messages/messages.module';
 
+// Importowanie poszczególnych modułów
 @Module({
   imports: [
     PrismaModule,
